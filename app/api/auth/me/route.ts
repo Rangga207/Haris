@@ -3,6 +3,8 @@ import { getSession } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { createErrorResponse } from "@/lib/validators";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   const session = await getSession();
   if (!session) {

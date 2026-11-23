@@ -9,6 +9,8 @@ import { saveUploadedFile } from "@/lib/storage";
 import { isOverdue } from "@/lib/overdue";
 import { TERMINAL_STATUSES } from "@/lib/ticket-state";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(request: NextRequest) {
   try {
     const session = await getSession();

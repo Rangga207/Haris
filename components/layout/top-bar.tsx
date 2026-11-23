@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Role } from "@prisma/client";
 import { Menu, LogOut, Bell } from "lucide-react";
@@ -22,6 +22,24 @@ export function TopBar({
   title,
 }: TopBarProps) {
   const router = useRouter();
+  const [unreadCount, setUnreadCount] = useState(unreadNotifications);
+
+  useEffect(() => {
+    async function loadUnreadCount() {
+      try {
+        const res = await fetch("/api/notifications");
+        if (res.ok) {
+          const data = await res.json();
+          if (typeof data.unreadCount === "number") {
+            setUnreadCount(data.unreadCount);
+          }
+        }
+      } catch {
+        // Silently catch background poll error
+      }
+    }
+    loadUnreadCount();
+  }, []);
 
   const handleLogout = async () => {
     try {
