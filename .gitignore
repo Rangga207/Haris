@@ -1,0 +1,11 @@
+node_modules
+.next
+out
+.env
+.env.local
+.env.*.local
+public/uploads/*
+!public/uploads/.gitkeep
+coverage
+*.log
+.DS_Store

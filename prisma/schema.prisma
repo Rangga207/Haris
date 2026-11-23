@@ -1,0 +1,229 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  REPORTER
+  ADMIN
+  TECHNICIAN
+  UNIT_HEAD
+}
+
+enum Priority {
+  CRITICAL
+  HIGH
+  MEDIUM
+  LOW
+}
+
+enum Channel {
+  WEB
+  WHATSAPP
+  WALK_IN
+  PHONE
+}
+
+enum AttachmentKind {
+  BEFORE
+  AFTER
+}
+
+enum TicketStatus {
+  SUBMITTED
+  NEEDS_INFO
+  TRIAGED
+  ASSIGNED
+  IN_PROGRESS
+  ON_HOLD
+  RESOLVED
+  CLOSED
+  REOPENED
+  REJECTED
+  MERGED
+  CANCELLED
+}
+
+model User {
+  id             String    @id @default(uuid())
+  name           String
+  email          String    @unique
+  passwordHash   String
+  phone          String?
+  role           Role
+  specialization String?   // electrical / plumbing / HVAC / general
+  isActive       Boolean   @default(true)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  // Relations
+  reportedTickets       Ticket[]               @relation("ReporterTickets")
+  createdTickets        Ticket[]               @relation("CreatedByTickets")
+  assignedTickets       Ticket[]               @relation("AssigneeTickets")
+  attachments           TicketAttachment[]
+  statusChanges         TicketStatusHistory[]
+  assignedTechnicians   TicketAssignment[]     @relation("TechAssignments")
+  createdAssignments    TicketAssignment[]     @relation("AssignerAssignments")
+  notifications         Notification[]
+}
+
+model Building {
+  id        String   @id @default(uuid())
+  code      String   @unique
+  name      String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  rooms   Room[]
+  tickets Ticket[]
+}
+
+model Room {
+  id         String   @id @default(uuid())
+  buildingId String
+  name       String
+  floor      String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  building Building @relation(fields: [buildingId], references: [id], onDelete: Cascade)
+  tickets  Ticket[]
+
+  @@unique([buildingId, name])
+}
+
+model Category {
+  id              String   @id @default(uuid())
+  name            String   @unique
+  defaultPriority Priority
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  tickets Ticket[]
+}
+
+model Ticket {
+  id              String       @id @default(uuid())
+  ticketNo        String       @unique
+  reporterId      String
+  createdById     String
+  channel         Channel
+  buildingId      String
+  roomId          String
+  categoryId      String
+  description     String
+  isSafetyHazard  Boolean      @default(false)
+  priority        Priority
+  status          TicketStatus
+  assigneeId      String?
+  targetDate      DateTime?
+  parentTicketId  String?
+  resolvedAt      DateTime?
+  closedAt        DateTime?
+  holdReason      String?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  // Relations
+  reporter       User                   @relation("ReporterTickets", fields: [reporterId], references: [id])
+  createdBy      User                   @relation("CreatedByTickets", fields: [createdById], references: [id])
+  assignee       User?                  @relation("AssigneeTickets", fields: [assigneeId], references: [id])
+  building       Building               @relation(fields: [buildingId], references: [id])
+  room           Room                   @relation(fields: [roomId], references: [id])
+  category       Category               @relation(fields: [categoryId], references: [id])
+  parentTicket   Ticket?                @relation("MergedTickets", fields: [parentTicketId], references: [id])
+  childTickets   Ticket[]               @relation("MergedTickets")
+  attachments    TicketAttachment[]
+  statusHistory  TicketStatusHistory[]
+  assignments    TicketAssignment[]
+  notifications  Notification[]
+  feedback       Feedback?
+
+  @@index([status, priority])
+  @@index([assigneeId, status])
+  @@index([reporterId])
+  @@index([buildingId, categoryId])
+}
+
+model TicketAttachment {
+  id           String         @id @default(uuid())
+  ticketId     String
+  uploadedById String
+  fileUrl      String
+  kind         AttachmentKind
+  createdAt    DateTime       @default(now())
+
+  ticket     Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  uploadedBy User   @relation(fields: [uploadedById], references: [id])
+}
+
+model TicketStatusHistory {
+  id          String        @id @default(uuid())
+  ticketId    String
+  fromStatus  TicketStatus?
+  toStatus    TicketStatus
+  changedById String
+  note        String?
+  createdAt   DateTime      @default(now())
+
+  ticket    Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  changedBy User   @relation(fields: [changedById], references: [id])
+
+  @@index([ticketId, createdAt])
+}
+
+model TicketAssignment {
+  id           String    @id @default(uuid())
+  ticketId     String
+  technicianId String
+  assignedById String
+  assignedAt   DateTime  @default(now())
+  unassignedAt DateTime?
+
+  ticket     Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  technician User   @relation("TechAssignments", fields: [technicianId], references: [id])
+  assignedBy User   @relation("AssignerAssignments", fields: [assignedById], references: [id])
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  ticketId  String?
+  message   String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  ticket Ticket? @relation(fields: [ticketId], references: [id], onDelete: SetNull)
+}
+
+model Feedback {
+  id        String   @id @default(uuid())
+  ticketId  String   @unique
+  rating    Int      // 1-5
+  comment   String?
+  createdAt DateTime @default(now())
+
+  ticket Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+}
+
+model SlaPolicy {
+  id              String   @id @default(uuid())
+  priority        Priority @unique
+  responseHours   Int
+  resolutionHours Int
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model TicketMonthlySequence {
+  yearMonth  String   @id // Format: YYYYMM
+  sequence   Int      @default(0)
+  updatedAt  DateTime @updatedAt
+}
