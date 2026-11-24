@@ -43,10 +43,7 @@
           "request": {
             "method": "POST",
             "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
+              { "key": "Content-Type", "value": "application/json" }
             ],
             "body": {
               "mode": "raw",
@@ -64,10 +61,7 @@
           "request": {
             "method": "POST",
             "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
+              { "key": "Content-Type", "value": "application/json" }
             ],
             "body": {
               "mode": "raw",
@@ -85,10 +79,7 @@
           "request": {
             "method": "POST",
             "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
+              { "key": "Content-Type", "value": "application/json" }
             ],
             "body": {
               "mode": "raw",
@@ -139,6 +130,18 @@
               "raw": "{{baseUrl}}/api/buildings",
               "host": ["{{baseUrl}}"],
               "path": ["api", "buildings"]
+            }
+          }
+        },
+        {
+          "name": "List Rooms for Building",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/buildings/replace-with-building-id/rooms",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "buildings", "replace-with-building-id", "rooms"]
             }
           }
         },
@@ -216,14 +219,11 @@
           "request": {
             "method": "PATCH",
             "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
+              { "key": "Content-Type", "value": "application/json" }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"priority\": \"HIGH\",\n  \"reason\": \"High traffic examination room, required immediately.\"\n}"
+              "raw": "{\n  \"priority\": \"HIGH\",\n  \"reason\": \"High traffic examination room, repair required immediately.\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/api/tickets/{{sampleTicketId}}/priority",
@@ -237,10 +237,7 @@
           "request": {
             "method": "POST",
             "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
+              { "key": "Content-Type", "value": "application/json" }
             ],
             "body": {
               "mode": "raw",
@@ -254,14 +251,11 @@
           }
         },
         {
-          "name": "Transition Status (Start / Hold / Resolve / Info)",
+          "name": "Transition Status (Start / Hold / Resolve)",
           "request": {
             "method": "POST",
             "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
+              { "key": "Content-Type", "value": "application/json" }
             ],
             "body": {
               "mode": "raw",
@@ -271,6 +265,156 @@
               "raw": "{{baseUrl}}/api/tickets/{{sampleTicketId}}/status",
               "host": ["{{baseUrl}}"],
               "path": ["api", "tickets", "{{sampleTicketId}}", "status"]
+            }
+          }
+        },
+        {
+          "name": "Check Duplicate Tickets",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/tickets/{{sampleTicketId}}/duplicates",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "tickets", "{{sampleTicketId}}", "duplicates"]
+            }
+          }
+        },
+        {
+          "name": "Merge Duplicate Ticket (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"primaryTicketId\": \"replace-with-primary-ticket-id\",\n  \"reason\": \"Duplicate complaint reported for same room.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/tickets/{{sampleTicketId}}/merge",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "tickets", "{{sampleTicketId}}", "merge"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Closure & Feedback",
+      "item": [
+        {
+          "name": "Confirm Resolution (Reporter)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rating\": 5,\n  \"comment\": \"Quick repair, thank you!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/tickets/{{sampleTicketId}}/confirm",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "tickets", "{{sampleTicketId}}", "confirm"]
+            }
+          }
+        },
+        {
+          "name": "Reopen Ticket (Reporter within 3 Days)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Light flickering began again shortly after technician left.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/tickets/{{sampleTicketId}}/reopen",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "tickets", "{{sampleTicketId}}", "reopen"]
+            }
+          }
+        },
+        {
+          "name": "Submit Feedback Rating",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rating\": 4,\n  \"comment\": \"Clean and professional work.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/tickets/{{sampleTicketId}}/feedback",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "tickets", "{{sampleTicketId}}", "feedback"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Dashboard & Reports",
+      "item": [
+        {
+          "name": "Executive Summary Metrics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/dashboard/summary",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "dashboard", "summary"]
+            }
+          }
+        },
+        {
+          "name": "Unresolved Tickets Queue",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/dashboard/unresolved?sort=age_desc",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "dashboard", "unresolved"],
+              "query": [
+                { "key": "sort", "value": "age_desc" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Export Tickets CSV",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/reports/export",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "reports", "export"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Automation & Cron",
+      "item": [
+        {
+          "name": "Auto-Close Resolved Tickets (> 3 Days)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/cron/auto-close",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "cron", "auto-close"]
             }
           }
         }

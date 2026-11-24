@@ -7,6 +7,7 @@ import { Role } from "@prisma/client";
 import { AppShell } from "@/components/layout/app-shell";
 import { TicketDetailView } from "@/components/features/ticket-detail-view";
 import { TriagePanel } from "@/components/features/triage-panel";
+import { DuplicateSuggestionBanner } from "@/components/features/duplicate-suggestion-banner";
 import { calculateSuggestedPriority } from "@/lib/priority";
 import { isOverdue } from "@/lib/overdue";
 import { ArrowLeft } from "lucide-react";
@@ -71,14 +72,19 @@ export default async function AdminTicketDetailPage({
           ticket={enrichedTicket as any}
           actionSlot={
             session.role === Role.ADMIN ? (
-              <TriagePanel
-                ticketId={ticket.id}
-                currentPriority={ticket.priority}
-                suggestedPriority={suggestedPriority}
-                currentStatus={ticket.status}
-                currentAssigneeId={ticket.assigneeId}
-                currentTargetDate={ticket.targetDate}
-              />
+              <div className="space-y-4">
+                {ticket.status === "SUBMITTED" && (
+                  <DuplicateSuggestionBanner ticketId={ticket.id} />
+                )}
+                <TriagePanel
+                  ticketId={ticket.id}
+                  currentPriority={ticket.priority}
+                  suggestedPriority={suggestedPriority}
+                  currentStatus={ticket.status}
+                  currentAssigneeId={ticket.assigneeId}
+                  currentTargetDate={ticket.targetDate}
+                />
+              </div>
             ) : null
           }
         />

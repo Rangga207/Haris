@@ -7,6 +7,7 @@ import { Role, TicketStatus } from "@prisma/client";
 import { AppShell } from "@/components/layout/app-shell";
 import { TicketDetailView } from "@/components/features/ticket-detail-view";
 import { ReporterReplyPanel } from "@/components/features/reporter-reply-panel";
+import { ClosureFeedbackPanel } from "@/components/features/closure-feedback-panel";
 import { isOverdue } from "@/lib/overdue";
 import { ArrowLeft } from "lucide-react";
 
@@ -28,6 +29,7 @@ export default async function ReporterTicketDetailPage({
       building: { select: { id: true, code: true, name: true } },
       room: { select: { id: true, name: true, floor: true } },
       category: { select: { id: true, name: true } },
+      feedback: true,
       attachments: {
         select: { id: true, fileUrl: true, kind: true, createdAt: true },
         orderBy: { createdAt: "asc" },
@@ -80,6 +82,13 @@ export default async function ReporterTicketDetailPage({
                 ticketId={ticket.id}
                 status={ticket.status}
                 latestNote={latestNeedsInfoRow?.note}
+              />
+            ) : ticket.status === TicketStatus.RESOLVED || ticket.status === TicketStatus.CLOSED ? (
+              <ClosureFeedbackPanel
+                ticketId={ticket.id}
+                status={ticket.status}
+                resolvedAt={ticket.resolvedAt}
+                existingFeedback={ticket.feedback}
               />
             ) : null
           }
